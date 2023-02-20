@@ -1,3 +1,6 @@
+// import the scripts from /libs/FileSaver.js-2.0.4
+var FileSaver = require("FileSaver.js-2.0.4/src/FileSaver.js");
+
 // make a webserver
 var WebServer = require("webserver").WebServer;
 var server = new WebServer();
@@ -25,7 +28,7 @@ var handleRequest = function (request, response) {
     var result = {};
     if (action == "get-package") {
         // return a file
-        var file = new File("/packages/" + name + ".zip");
+        var file = new File("/packages/" + name + "/" + "package.zip");
         if (file.exists) {
             result = {
                 "status": "ok",
@@ -39,6 +42,27 @@ var handleRequest = function (request, response) {
                 "message": "package not found"
             };
         }
+    } else if (action == "publish-package") {
+        // save a file to the server
+        var blob = new Blob([params.file],
+            { type: "application/zip;charset=utf-8" });
+        
+        FileSaver.saveAs(blob, "/packages/" + name + ".zip");
+
+        result = {
+            "status": "ok",
+            "message": "package published"
+        };
+    } else if (action == "user-verify") {
+        result = {
+            "status": "ok",
+            "message": "user verified"
+        };
+    } else {
+        result = {
+            "status": "error",
+            "message": "unknown action"
+        };
     }
     response.statusCode = 200;
     response.write(JSON.stringify(result));
